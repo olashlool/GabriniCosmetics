@@ -1,0 +1,282 @@
+﻿@model GabriniCosmetics.Areas.Admin.Models.DTOs.CreateProductDTO
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+<!-- Container-fluid starts-->
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Create New Product</h4>
+                </div>
+                <div class="card-body">
+                    <div class="card-wrapper border rounded-3">
+                        <form href="/Admin/Products/Create"  method="post" enctype="multipart/form-data" class="row g-3" id="createForm">
+                            <div class="col-md-12">
+                                <label class="form-label" for="NameEn">Enter Name in English</label>
+                                <input class="form-control" asp-for="NameEn" placeholder="Enter Name in English" required>
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label" for="NameAr">Enter Name in Arabic</label>
+                                <input class="form-control" asp-for="NameAr" placeholder="Enter Name in Arabic" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="SubcategoryId">Select Subcategory</label>
+                                <select class="form-control" asp-for="SubcategoryId" asp-items="ViewBag.Subcategories">
+                                    <option selected disabled>Select Subcategory</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="Price">Enter Price</label>
+                                <input type="text" class="form-control" asp-for="Price" placeholder="Enter Price" required>
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label" for="DescriptionEn">Enter Description in English</label>
+                                <textarea class="form-control" asp-for="DescriptionEn" placeholder="Enter Description in English"></textarea>
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label" for="DescriptionAr">Enter Description in Arabic</label>
+                                <textarea class="form-control" asp-for="DescriptionAr" placeholder="Enter Description in Arabic"></textarea>
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label" for="ImageUploads">Upload Images</label>
+                                <div id="drop-zone" class="border rounded p-3 d-flex justify-content-center align-items-center">
+                                    <p class="text-muted">Drag & drop your images here or click to upload</p>
+                                    <input class="form-control d-none" name="ImageUploads" type="file" accept="image/*" multiple onchange="handleImageUpload(event)" id="imageUploadInput">
+                                </div>
+                                <div id="imagePreview" class="d-flex flex-wrap gap-2 mt-2"></div>
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label">Select Colors</label>
+                                <div id="colorPickerContainer" class="d-flex flex-wrap gap-2">
+                                    <input class="form-control color-picker" type="color" name="Colors" asp-for="Colors">
+                                </div>
+                                <button type="button" class="btn btn-secondary mt-2" id="addColorPicker">Add Another Color</button>
+                            </div>
+                            <div class="col-md-12">
+                                <input name="FlagNames" placeholder="write some flags">
+                            </div>
+                            <input type="hidden" name="FlagNames" id="FlagNames">
+
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" id="IsSale" type="checkbox" asp-for="IsSale" onchange="toggleSaleFields()">
+                                    <label class="form-check-label" for="IsSale">Is Sale?</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" id="IsDealOfDay" asp-for="IsDealOfDay" type="checkbox">
+                                    <label class="form-check-label" for="IsDealOfDay">Is Deal Of The Day?</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" id="IsAvailability" asp-for="IsAvailability" type="checkbox">
+                                    <label class="form-check-label" for="IsDealOfDay">Is Availability?</label>
+                                </div>
+                            </div>
+                            <div id="saleFields" class="col-md-12 d-none">
+                                <div class="col-md-12">
+                                    <label class="form-label" for="PersantageSale">Enter Percentage Sale</label>
+                                    <input type="number" class="form-control" asp-for="PersantageSale" placeholder="Percentage Sale">
+                                </div>
+                                <div class="col-md-12">
+                                    <label class="form-label" for="PriceAfterDiscount">Enter Price After Discount</label>
+                                    <input type="text" class="form-control" asp-for="PriceAfterDiscount" placeholder="Price After Discount">
+                                </div>
+                            </div>
+                            <div class="col-12 d-flex gap-2 justify-content-end">
+                                <button class="btn btn-primary" type="submit">Save</button>
+                                <a class="btn btn-secondary" href="/admin/products">Cancel</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // JavaScript to handle drag and drop image upload
+    const dropZone = document.getElementById('drop-zone');
+    const imageUploadInput = document.getElementById('imageUploadInput');
+
+    dropZone.addEventListener('click', () => imageUploadInput.click());
+
+    dropZone.addEventListener('dragover', (event) => {
+        event.preventDefault();
+        dropZone.classList.add('dragover');
+    });
+
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+
+    dropZone.addEventListener('drop', (event) => {
+        event.preventDefault();
+        dropZone.classList.remove('dragover');
+        const files = event.dataTransfer.files;
+        handleFiles(files);
+    });
+
+    imageUploadInput.addEventListener('change', (event) => {
+        const files = event.target.files;
+        handleFiles(files);
+    });
+
+    function handleFiles(files) {
+        for (let i = 0; i < files.length; i++) {
+            handleImageUpload(files[i]);
+        }
+    }
+
+    function handleImageUpload(file) {
+        const imagePreview = document.getElementById('imagePreview');
+
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                const imgWrapper = document.createElement('div');
+                imgWrapper.classList.add('img-wrapper', 'position-relative');
+
+                const img = document.createElement('img');
+                img.src = event.target.result;
+                img.classList.add('img-preview');
+
+                const removeBtn = document.createElement('button');
+                removeBtn.classList.add('btn', 'btn-sm', 'remove-btn', 'position-absolute');
+                removeBtn.innerHTML = '<i class="fa-light fa-trash"></i>';
+                removeBtn.onclick = function () {
+                    imgWrapper.remove();
+                    // Remove the input element if needed
+                };
+
+                imgWrapper.appendChild(img);
+                imgWrapper.appendChild(removeBtn);
+                imagePreview.appendChild(imgWrapper);
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    // Function to add another image upload input
+    function addImageUpload() {
+        const container = document.getElementById('imageUploadContainer');
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.name = 'ImageUploads';
+        input.accept = 'image/*';
+        input.classList.add('form-control', 'mt-2');
+        input.onchange = handleImageUpload;
+        container.appendChild(input);
+    }
+
+    // JavaScript to handle adding another color picker
+    document.getElementById('addColorPicker').addEventListener('click', function () {
+        var container = document.getElementById('colorPickerContainer');
+        var colorPickerWrapper = document.createElement('div');
+        colorPickerWrapper.classList.add('color-picker-wrapper', 'position-relative');
+
+        var colorPicker = document.createElement('input');
+        colorPicker.setAttribute('type', 'color');
+        colorPicker.setAttribute('name', 'Colors');
+        colorPicker.classList.add('form-control', 'color-picker');
+
+        var removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.classList.add('btn', 'btn-sm', 'remove-btn', 'position-absolute');
+        removeBtn.innerHTML = '<i class="fa-light fa-trash"></i>';
+        removeBtn.onclick = function () {
+            removeColorPicker(this);
+        };
+
+        colorPickerWrapper.appendChild(colorPicker);
+        colorPickerWrapper.appendChild(removeBtn);
+        container.appendChild(colorPickerWrapper);
+    });
+
+    // Function to remove color picker
+    function removeColorPicker(button) {
+        const colorPickerWrapper = button.parentNode;
+        colorPickerWrapper.remove();
+    }
+    function toggleSaleFields() {
+        var isChecked = document.getElementById("IsSale").checked;
+        var saleFields = document.getElementById("saleFields");
+
+        if (isChecked) {
+            saleFields.classList.remove("d-none");
+        } else {
+            saleFields.classList.add("d-none");
+        }
+    }
+</script>
+
+<style>
+    #drop-zone {
+        height: 150px;
+        cursor: pointer;
+        text-align: center;
+        border: 2px dashed #ccc;
+    }
+
+        #drop-zone.dragover {
+            border-color: #000;
+            background-color: #f0f0f0;
+        }
+
+    .img-wrapper {
+        position: relative;
+        display: inline-block;
+        margin-right: 10px;
+    }
+
+    .img-preview {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+    }
+
+    .remove-btn {
+            top: 12px;
+    right: 4px;
+    color: red;
+    padding: 0;
+    font-size: 16px;
+    }
+
+    .color-picker {
+        width: 50px;
+    }
+</style>
+
+<style>
+    #drop-zone {
+        height: 150px;
+        cursor: pointer;
+        text-align: center;
+        border: 2px dashed #ccc;
+    }
+
+        #drop-zone.dragover {
+            border-color: #000;
+            background-color: #f0f0f0;
+        }
+
+    .img-wrapper {
+        position: relative;
+        display: inline-block;
+        margin-right: 10px;
+    }
+
+    .img-preview {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+    }
+
+    .color-picker {
+        width: 50px;
+    }
+</style>
+<!-- Container-fluid Ends-->
